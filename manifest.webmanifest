@@ -1,0 +1,20 @@
+{
+  "name": "Fizio Vision — mjerenje pokreta i držanja",
+  "short_name": "Fizio Vision",
+  "description": "Lokalni prototip za mjerenje kuta koljena kamerom.",
+  "lang": "hr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#10231f",
+  "background_color": "#0c1715",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

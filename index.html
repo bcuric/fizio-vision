@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#10231f">
+    <meta name="description" content="Lokalni prototip za mjerenje koljena i opis procjene držanja kamerom.">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Fizio Vision — mjerenje pokreta i držanja</title>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar layout-header">
+        <div>
+          <p class="eyebrow">FIZIO VISION · PROTOTIP</p>
+          <h1 id="app-title">Mjerenje koljena</h1>
+        </div>
+        <button id="install-button" class="button button-quiet" type="button" hidden>Instaliraj</button>
+      </header>
+
+      <section class="viewer-card layout-viewer" aria-label="Prikaz kamere">
+        <div id="viewer" class="viewer">
+          <video id="camera" autoplay playsinline muted></video>
+          <canvas id="overlay" aria-hidden="true"></canvas>
+          <div id="viewer-message" class="viewer-message">
+            <span class="camera-icon" aria-hidden="true">◎</span>
+            <p>Pokreni kameru da vidiš skelet i kut uživo.</p>
+          </div>
+          <span id="live-angle" class="live-angle" hidden>—°</span>
+        </div>
+        <div class="viewer-footer">
+          <span id="status-dot" class="status-dot"></span>
+          <p id="status" role="status" aria-live="polite">Kamera nije pokrenuta</p>
+        </div>
+      </section>
+
+      <section id="posture-guide" class="guide-card layout-guide" aria-labelledby="guide-title" hidden>
+        <div class="guide-heading">
+          <div>
+            <p class="eyebrow">VOĐENI TEST · 3 PONAVLJANJA</p>
+            <h2 id="guide-title">Postavi kameru</h2>
+          </div>
+          <span id="guide-step-count" class="guide-step-count">KORAK 1 / 3</span>
+        </div>
+        <div class="guide-demo" id="guide-demo" data-step="0" data-phase="find-person" role="img" aria-label="Ilustracija položaja tijela i glave sprijeda">
+          <svg viewBox="0 0 360 230" aria-hidden="true">
+            <defs>
+              <linearGradient id="head-shade" x1="0" x2="1">
+                <stop offset="0" stop-color="#b7f36b" stop-opacity=".24"/>
+                <stop offset="1" stop-color="#b7f36b" stop-opacity=".04"/>
+              </linearGradient>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                <path d="M0 0 8 4 0 8Z" fill="#b7f36b"/>
+              </marker>
+            </defs>
+            <rect x="1" y="1" width="358" height="228" rx="18" fill="#0b1512" stroke="#30423a"/>
+            <path d="M180 18v194M38 116h284" stroke="#789087" stroke-dasharray="4 7" opacity=".34"/>
+            <g class="demo-person">
+              <path class="demo-shoulder-outline" d="M87 201c8-39 31-59 70-62h46c39 3 62 23 70 62" fill="#1c312a" stroke="#b7f36b" stroke-width="2"/>
+              <path d="M157 129v25c0 12 46 12 46 0v-25" fill="#d4a482" stroke="#f2d3b6" stroke-width="1.5"/>
+              <path class="demo-head-side" d="M179 38c-30 0-48 21-48 51v25c0 27 20 48 48 50 9-7 14-18 14-34V50c-3-7-8-12-14-12Z" fill="url(#head-shade)" stroke="#b7f36b" stroke-width="2"/>
+              <path class="demo-head-front" d="M180 38c-27 0-45 21-45 51v24c0 29 19 50 45 50s45-21 45-50V89c0-30-18-51-45-51Z" fill="#294237" stroke="#b7f36b" stroke-width="2.5"/>
+              <path class="demo-ear demo-ear-left" d="M137 91c-12-6-15 4-11 17 3 9 8 13 14 10" fill="#294237" stroke="#b7f36b" stroke-width="2"/>
+              <path class="demo-ear demo-ear-right" d="M223 91c12-6 15 4 11 17-3 9-8 13-14 10" fill="#294237" stroke="#b7f36b" stroke-width="2"/>
+              <path d="M161 92h9m20 0h9M180 95v20m-10 10q10 7 20 0" fill="none" stroke="#e9f4e8" stroke-linecap="round" stroke-width="2"/>
+              <circle cx="180" cy="104" r="52" fill="none" stroke="#b7f36b" stroke-dasharray="3 6" opacity=".7"/>
+              <path d="M180 47v115M129 103h102" stroke="#b7f36b" stroke-dasharray="3 6" opacity=".48"/>
+            </g>
+            <g class="demo-rotate-hint" fill="none" stroke="#b7f36b" stroke-width="2">
+              <path d="M94 69a43 43 0 0 1 32-19" marker-end="url(#arrow)"/>
+              <path d="M266 161a43 43 0 0 1-32 19" marker-end="url(#arrow)"/>
+            </g>
+            <g class="demo-hold-hint" fill="none" stroke="#b7f36b" stroke-width="2">
+              <path d="M68 196h28m-14-14v28M264 196h28m-14-14v28"/>
+            </g>
+            <g class="demo-phone" transform="translate(282 35)">
+              <rect x="0" y="0" width="31" height="51" rx="6" fill="#152720" stroke="#dbe9dc" stroke-width="2"/>
+              <circle cx="15.5" cy="7" r="1.5" fill="#b7f36b"/>
+              <path d="M6 17h19M6 23h19M6 29h19M6 35h19" stroke="#6b8578" stroke-width="1"/>
+            </g>
+          </svg>
+          <span id="guide-demo-caption" class="guide-demo-caption">Čekam kameru i osobu u kadru</span>
+        </div>
+        <p id="guide-copy" class="guide-copy">Postavi telefon ravno, približno u visini ramena. Stani dovoljno daleko da se vide cijela glava, vrat i oba ramena.</p>
+        <div class="guide-detection">
+          <span id="guide-detection-dot" class="guide-detection-dot"></span>
+          <p id="guide-progress" class="guide-progress" aria-live="polite">Klikni „Pokreni kameru”. Vodič će sam prepoznati svaki korak.</p>
+        </div>
+      </section>
+
+      <section class="controls-card layout-controls" aria-label="Kontrole mjerenja">
+        <label class="field-label" for="test-mode">Što mjerimo?</label>
+        <select id="test-mode">
+          <option value="knee" selected>Koljeno — opseg pokreta</option>
+          <option value="gait">Hod — kadenca (obje noge)</option>
+          <option value="posture">Ramena i glava — držanje sprijeda</option>
+        </select>
+
+        <div id="side-controls">
+          <label class="field-label" for="side-select">Noga za mjerenje</label>
+          <select id="side-select">
+            <option value="left">Lijeva</option>
+            <option value="right" selected>Desna</option>
+            <option value="near">Bliža kameri (po frameu)</option>
+          </select>
+        </div>
+
+        <div class="button-row">
+          <button id="camera-button" class="button button-secondary" type="button">Pokreni kameru</button>
+          <button id="record-button" class="button button-primary" type="button" disabled>Snimi test</button>
+        </div>
+        <div id="file-controls" class="file-row">
+          <button id="file-button" class="button button-quiet button-wide" type="button">Analiziraj snimku iz galerije</button>
+          <input id="file-input" type="file" accept="video/*" hidden>
+        </div>
+        <p id="test-hint" class="hint">Postavi cijelu nogu u kadar, bočno prema kameri. Odabir noge možeš promijeniti prije testa.</p>
+      </section>
+
+      <section class="results-card layout-results" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">REZULTAT TESTA</p>
+            <h2 id="results-title">Opseg pokreta koljena</h2>
+          </div>
+          <button id="reset-button" class="text-button" type="button" disabled>Očisti</button>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <span id="metric-label-1" class="metric-label">Fleksija min</span>
+            <strong id="metric-1">—<small>°</small></strong>
+          </div>
+          <div class="metric">
+            <span id="metric-label-2" class="metric-label">Fleksija max</span>
+            <strong id="metric-2">—<small>°</small></strong>
+          </div>
+          <div class="metric metric-highlight">
+            <span id="metric-label-3" class="metric-label">ROM</span>
+            <strong id="metric-3">—<small>°</small></strong>
+          </div>
+        </div>
+        <p id="result-note" class="result-note">Pokreni kameru, zatim pritisni „Snimi test”.</p>
+        <figure id="chart" class="chart" hidden>
+          <figcaption id="chart-title" class="chart-title">Fleksija koljena kroz vrijeme</figcaption>
+          <div class="chart-plot">
+            <canvas id="chart-canvas" role="img" aria-label="Graf fleksije koljena kroz vrijeme"></canvas>
+            <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+          </div>
+          <div id="chart-legend" class="chart-legend" hidden>
+            <span><i class="swatch swatch-left"></i>lijeva</span>
+            <span><i class="swatch swatch-right"></i>desna</span>
+            <span><i class="swatch swatch-peak"></i>vrh ponavljanja / zamaha</span>
+          </div>
+        </figure>
+        <ol id="repetition-details" class="repetition-details" aria-label="Pojedinačni rezultati ponavljanja" hidden></ol>
+
+        <form id="save-form" class="save-form" hidden>
+          <div class="field-pair">
+            <label>
+              <span class="field-label">Oznaka pacijenta</span>
+              <input id="patient-input" type="text" maxlength="24" autocomplete="off" placeholder="npr. P07 (bez imena)">
+            </label>
+            <label id="goniometer-field">
+              <span class="field-label">Goniometar, fleksija max (°)</span>
+              <input id="goniometer-input" type="number" inputmode="decimal" min="0" max="180" step="0.5" placeholder="npr. 112">
+            </label>
+          </div>
+          <div class="button-row">
+            <button id="save-button" class="button button-primary" type="submit">Spremi mjerenje</button>
+            <button id="frames-button" class="button button-secondary" type="button">Frameovi CSV</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="history-card layout-history" aria-labelledby="history-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">SPREMLJENO NA OVOM UREĐAJU</p>
+            <h2 id="history-title">Mjerenja i usporedba s goniometrom</h2>
+          </div>
+          <div class="heading-actions">
+            <button id="export-button" class="text-button" type="button" disabled>Izvezi CSV</button>
+            <button id="clear-history-button" class="text-button" type="button" disabled>Obriši sve</button>
+          </div>
+        </div>
+        <p id="history-summary" class="result-note">Još nema spremljenih mjerenja.</p>
+        <div class="table-scroll">
+          <table id="history-table" class="history-table" hidden>
+            <thead>
+              <tr>
+                <th scope="col">Datum</th>
+                <th scope="col">Oznaka</th>
+                <th scope="col">Test</th>
+                <th scope="col">Izvor</th>
+                <th scope="col" class="num">App</th>
+                <th scope="col" class="num">Goniometar</th>
+                <th scope="col" class="num">Razlika</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="privacy-note layout-footer">
+        Video se obrađuje uživo na ovom uređaju i ne sprema se niti šalje na poslužitelj.
+        Ovo je prototip za povratne informacije, ne medicinski uređaj.
+      </footer>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
